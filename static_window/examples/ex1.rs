@@ -4,9 +4,9 @@ This example is a baseline to show how to get things showing on your screen, boo
 */
 
 
-extern crate rusty_knots;
+extern crate visibility_graph;
 
-use rusty_knots::static_window::*;
+use static_window::*;
 
 fn main(){
 

@@ -10,7 +10,8 @@ extern crate piston_window;
 use piston_window::*;
 
 //use rusty_knots::visibility_graph::*;
-mod visibility_graph;
+extern crate visibility_graph;
+use visibility_graph::*;
 
 pub enum CommonColors{
     White,
@@ -50,6 +51,7 @@ impl GraphicsElement{
         match self{
             GraphicsElement::LineElement{x1,y1,x2,y2,radius,dashed,c} => line(c.to_rgb(),*radius,[*x1,*y1,*x2,*y2],t, g),
             GraphicsElement::CircleElement{x,y,radius,c} => ellipse(c.to_rgb(),[*x,*y,*radius,*radius],t,g),
+            _ => {},
         }
 
     }
