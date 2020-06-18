@@ -11,6 +11,7 @@ use piston::window::WindowSettings;
 use std::io;
 
 mod visibility_graph;
+mod static_window;
 
 pub struct App {
     gl: GlGraphics, // OpenGL drawing backend.
