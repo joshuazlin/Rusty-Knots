@@ -6,13 +6,15 @@ So really, it's just a list of edges.
 It probably needs a little something to tell it how precise to be too. 
 */
 
+extern crate rand;
+
 use std::ops;
 use std::fmt;
+use rand::Rng;
 
-pub struct Point {
-    x : f64,
-    y : f64,
-}
+
+
+pub struct Point { x : f64, y : f64,}
 
 impl Point {
     fn distance(&self, v : &Point) -> f64{
@@ -48,9 +50,6 @@ impl Edge<'_> {
     fn orientation(&self, v : &Point, eps : f64) -> Result<bool, String>{
         //Finds the orientation of v with respect to this edge. 
         //essentially, is v on the right of e.0 -> e.1?
-        
-        //let orient1 = det(&self)
-        //(self.1.x-self.0.x)*(v.y) - (self.1.y-self.0.y)*(v.x)
 
         let edge_vec = (self.1) - (self.0);
         let point_vec = v - self.0;
@@ -68,8 +67,6 @@ impl Edge<'_> {
         //checks if this edge intersects with the edge "f".
         //Essentially, are the vertices of e on either side of self, and
         //are the vertices of self on either side of e?
-
-        //let or1 = self.orientation(e.0,eps) ^ self.orientation(e.1,eps)
 
         let or1_1 = self.orientation(e.0, eps);
         let or1_2 = self.orientation(e.1, eps);
@@ -156,6 +153,10 @@ pub struct VisibilityGraph {
 
 impl VisibilityGraph {
 
+    fn new(eps : f64) -> VisibilityGraph{
+        VisibilityGraph{eps:eps, vertices : vec![], physical_edges : vec![], visibility_edges : vec![]}
+    }
+
     fn add_point(&mut self, v : Point){
         //Adds a point to the visibility graph 
 
@@ -195,6 +196,39 @@ impl VisibilityGraph {
 
         self.physical_edges.push(e);
     }
+
+    pub fn random(width: f64, height:f64, num_verts: u32, num_edges:u32, eps:f64) -> VisibilityGraph{
+        //Everything is constrained to live within [0,width]*[0,height]
+        //num_verts is the number of vertices 
+        //this algorithm is big dumb, and will try to have physical edges between 0->1, 1->2, bla bla 
+        //until we saturate num_edges
+        //So, we might have less than num_edges number of edges
+
+        let mut rng = rand::thread_rng();
+
+        //let points : [f64;num_verts] = [rng.gen();num_verts];
+        let mut g = VisibilityGraph::new(eps);
+        for i in 1..num_verts{
+            g.add_point(Point{x:rng.gen(),y:rng.gen()});
+        }
+
+        let mut num_added_edges = 0;
+        for i in 0..num_verts-2{
+            //let new_edge = (i,i+1);
+            if !g.physical_edges.iter().any(
+                |e| Edge(&g.vertices[e.0],&g.vertices[e.1]).intersect(
+                        &Edge(&g.vertices[i as usize],&g.vertices[(i+1) as usize]),eps).unwrap_or(true)){
+                g.physical_edges.push((i as usize, (i+1) as usize));
+                num_added_edges = num_added_edges + 1;
+                if num_added_edges >= num_edges{
+                    break;
+                }
+            }
+        }
+        g
+    }
+
+
 }
 
 impl fmt::Debug for VisibilityGraph {
@@ -207,7 +241,6 @@ impl fmt::Debug for VisibilityGraph {
          .finish()
     }
 }
-
 
 
 #[cfg(test)]
@@ -242,6 +275,11 @@ mod test_visibility_graph {
 
     }
 
+    #[test]
+    fn test_random_graph(){
+        let g = VisibilityGraph::random(500.0,500.0,100,20,0.01);
+    }
+
 }
 
 
@@ -255,5 +293,5 @@ mod test_random{
     }
 }
 
-
+//fn main(){}
 

@@ -9,6 +9,8 @@ and *thats it*, doesn't do anything else.
 extern crate piston_window;
 use piston_window::*;
 
+//use rusty_knots::visibility_graph::*;
+mod visibility_graph;
 
 pub enum CommonColors{
     White,
@@ -38,19 +40,16 @@ I'm definitely not doing this part right either....
 */
 pub enum GraphicsElement{
     LineElement {x1:f64, y1:f64, x2:f64, y2:f64, radius: f64, dashed:bool, c:CommonColors,},
+    CircleElement {x:f64, y:f64, radius:f64,c:CommonColors,},
+    GraphElement(VisibilityGraph),
 }
 
 
 impl GraphicsElement{
     fn draw<G : Graphics>(&self, t : [[f64;3];2], g: &mut G){
         match self{
-            GraphicsElement::LineElement{x1: x1,
-                                         y1:y1,
-                                         x2:x2,
-                                         y2:y2,
-                                         radius:radius,
-                                         dashed:dashed,
-                                         c:c} => line(c.to_rgb(),*radius,[*x1,*y1,*x2,*y2],t, g),
+            GraphicsElement::LineElement{x1,y1,x2,y2,radius,dashed,c} => line(c.to_rgb(),*radius,[*x1,*y1,*x2,*y2],t, g),
+            GraphicsElement::CircleElement{x,y,radius,c} => ellipse(c.to_rgb(),[*x,*y,*radius,*radius],t,g),
         }
 
     }
