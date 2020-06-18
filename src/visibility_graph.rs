@@ -68,8 +68,36 @@ impl Edge<'_> {
         //checks if this edge intersects with the edge "f".
         //Essentially, are the vertices of e on either side of self, and
         //are the vertices of self on either side of e?
-        Ok((self.orientation(e.0, eps).unwrap() ^ self.orientation(e.1,eps).unwrap()) & 
-            (e.orientation(self.0,eps).unwrap() ^ e.orientation(self.1,eps).unwrap()))
+
+        //let or1 = self.orientation(e.0,eps) ^ self.orientation(e.1,eps)
+
+        let or1_1 = self.orientation(e.0, eps);
+        let or1_2 = self.orientation(e.1, eps);
+
+        let or2_1 = e.orientation(self.0, eps);
+        let or2_2 = e.orientation(self.1, eps);
+
+        match (or1_1,or1_2){
+            (Ok(a),Ok(b)) => if a ^ b == false{return Ok(false)}
+                             else {match (or2_1,or2_2){
+                                        (Ok(c),Ok(d)) => if c ^ d == false{return Ok(false)}
+                                                         else {return Ok(true)},
+                                        _ => {},
+                                   };},
+            _ => match (or2_1,or2_2){
+                (Ok(a),Ok(b)) => if a^b == false{return Ok(false)},
+                _ => {},
+            },
+        };
+
+        if (self.0.x.max(self.1.x) < e.0.x.min(e.1.x)-eps) | (self.0.x.min(self.1.x) > e.0.x.max(e.1.x)+eps){
+            return Ok(false)
+        }
+        if (self.0.y.max(self.1.y) < e.0.y.min(e.1.y)-eps) | (self.0.y.min(self.1.y) > e.0.y.max(e.1.y)+eps){
+            return Ok(false)
+        }
+
+        Err("Precision too low to determine intersection of segments".to_string())
     }
 }
 
@@ -106,6 +134,14 @@ mod test_point {
         assert!(!Edge(&v2,&v1).intersect(&Edge(&v3,&v4),0.1).unwrap());
         assert!(Edge(&v1,&v4).intersect(&Edge(&v2,&v3),0.1).unwrap());
         assert!(Edge(&v4,&v1).intersect(&Edge(&v3,&v2),0.1).unwrap());
+
+        let w0 = Point{x : 0.0,y:0.0,};
+        let w1 = Point{x : 1.0,y:1.0,};
+        let w2 = Point{x : 2.0,y:1.0,};
+        let w4 = Point{x : 2.0,y:2.0,};
+
+        assert!(!Edge(&w0,&w1).intersect(&Edge(&w2,&w4),0.01).unwrap());
+
     }
 }
 
@@ -119,36 +155,45 @@ pub struct VisibilityGraph {
 }
 
 impl VisibilityGraph {
+
     fn add_point(&mut self, v : Point){
         //Adds a point to the visibility graph 
 
         for (i,w) in self.vertices.iter().enumerate(){
             let temp_edge = Edge(&v,w);
-            if self.physical_edges.iter().all(|e| !temp_edge.intersect(&Edge(&self.vertices[e.0],&self.vertices[e.1]),self.eps).unwrap()){
+            if self.physical_edges.iter().all(|e| !temp_edge.intersect(&Edge(&self.vertices[e.0],&self.vertices[e.1]),self.eps).unwrap_or(true)){
                 self.visibility_edges.push((self.vertices.len(),i));
             }
         }
         self.vertices.push(v);
     }
 
-    fn add_edge(&mut self, i : usize, j : usize){
+    fn edge_ok(&self, e : (usize,usize),f : &(usize,usize)) -> bool{
+        
+        if (e.0 == f.0) | (e.1 == f.0) | (e.0 == f.1) | (e.1 == f.1){
+            return true
+        }
+
+        let temp_e = Edge(&self.vertices[e.0],&self.vertices[e.1]);
+        let temp_f = Edge(&self.vertices[f.0],&self.vertices[f.1]);
+        
+        !temp_e.intersect(&temp_f, self.eps).unwrap_or(true)
+
+    }
+
+
+    fn add_edge(&mut self, e : (usize,usize)){
         //Adds a physical_edge between two vertices
         //assert!(i < j);
-        let temp_edge = Edge(&self.vertices[i],&self.vertices[j]);
+        let temp_e = Edge(&self.vertices[e.0],&self.vertices[e.1]);
 
-        //self.visibility_edges = self.visibility_edges
-        //                            .iter()
-        //                            .filter(|e| temp_edge.intersect(&Edge(&self.vertices[e.0],&self.vertices[e.1]),self.eps).unwrap());
-        
         self.visibility_edges = self.visibility_edges
                                     .iter()
-                                    .filter(|e| !((**e == (i,j)) | (**e == (j,i)))
-                                              & temp_edge.intersect(&Edge(&self.vertices[e.0],&self.vertices[e.1]),self.eps).unwrap()  
-                                )
-                                    .map(|e| *e)
-                                    .collect();//::<Vec<(usize,usize)>>()
+                                    .filter(|f| self.edge_ok(e,*f))
+                                    .map(|f| *f)
+                                    .collect();
 
-        self.physical_edges.push((i,j));
+        self.physical_edges.push(e);
     }
 }
 
@@ -173,7 +218,7 @@ mod test_visibility_graph {
     fn test_graph(){
         
         let mut g = VisibilityGraph{
-            eps: 0.1,
+            eps: 0.01,
             vertices : vec![],
             physical_edges : vec![],
             visibility_edges : vec![],
@@ -186,15 +231,28 @@ mod test_visibility_graph {
         g.add_point(Point{x:2.0,y:2.0,});
         g.add_point(Point{x:3.0,y:3.0,});
 
-        g.add_edge(1,2);
-        g.add_edge(1,3);
-        g.add_edge(2,4);
-        g.add_edge(3,4);
-
-        println!("{:?}",g);
+        g.add_edge((1,2));
+        println!("{:?}",g.visibility_edges);
+        g.add_edge((1,3));
+        println!("{:?}",g.visibility_edges);
+        g.add_edge((2,4));
+        println!("{:?}",g.visibility_edges);
+        g.add_edge((3,4));
+        println!("{:?}",g.visibility_edges);
 
     }
 
+}
+
+
+#[cfg(test)]
+mod test_random{
+    use super::*;
+
+    #[test]
+    fn test_see(){
+        
+    }
 }
 
 
