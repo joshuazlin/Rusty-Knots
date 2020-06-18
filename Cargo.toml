@@ -13,3 +13,6 @@ pistoncore-glutin_window = "0.64.0"
 piston2d-opengl_graphics = "0.72.0"
 piston_window = "0.109.0"
 
+[lib]
+path = "src/lib.rs"
+name = "rusty_knots"

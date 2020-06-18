@@ -10,7 +10,7 @@ extern crate piston_window;
 use piston_window::*;
 
 
-enum CommonColors{
+pub enum CommonColors{
     White,
     Black,
     Red,
@@ -33,31 +33,10 @@ impl CommonColors{
     }
 }
 
-// struct LineElement{
-//     x1:f64,
-//     y1:f64,
-//     x2:f64,
-//     y2:f64,
-//     dashed:bool,
-//     c: CommonColors,
-// }
-
-// impl LineElement{
-//     fn draw(&self){
-//         //use graphics::*;
-
-//         let l = line::Line{color: self.c.to_rgb(),
-//                             radius : 1.0 as f64,
-//                             shape : line::Shape::Round};
-        
-//     }
-// }
-
-
 /*
 I'm definitely not doing this part right either....
 */
-enum GraphicsElement{
+pub enum GraphicsElement{
     LineElement {x1:f64, y1:f64, x2:f64, y2:f64, radius: f64, dashed:bool, c:CommonColors,},
 }
 
@@ -80,14 +59,14 @@ impl GraphicsElement{
 pub struct StaticWindow {
     opengl: OpenGL, // OpenGL drawing backend.
     window:  PistonWindow,
-    items: Vec<GraphicsElement>,
+    pub items: Vec<GraphicsElement>,
 }
 
 impl StaticWindow {
 
-    fn new() -> StaticWindow {
+    pub fn new(name : &str, width: u32, height:u32) -> StaticWindow {
         let opengl = OpenGL::V3_2;
-        let mut window: PistonWindow = WindowSettings::new("shapes", [512; 2])
+        let mut window: PistonWindow = WindowSettings::new(name, [width,height])
             .exit_on_esc(true)
             .graphics_api(opengl)
             .build()
@@ -101,7 +80,7 @@ impl StaticWindow {
         }
     }
 
-    fn draw(&mut self){
+    pub fn draw(&mut self){
         while let Some(e) = self.window.next() {
 
             self.window.draw_2d(&e, |c,g,_| {clear([1.0;4],g)});
@@ -126,16 +105,5 @@ impl StaticWindow {
 mod test_draw {
     use super::*;
 
-    #[test]
-    fn check_draw(){
-        let mut w = StaticWindow::new();
-        w.items.push(GraphicsElement::LineElement{x1 : 1.0,
-                                                  y1 : 2.0,
-                                                  x2 : 3.0,
-                                                  y2 : 4.0,
-                                                  radius:0.1,
-                                                  dashed:false,
-                                                  c:CommonColors::Blue});
-        w.draw();
-    }
+    //#[test]
 }
