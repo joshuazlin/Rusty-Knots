@@ -1056,6 +1056,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "rusty_knots"
+version = "0.1.0"
+dependencies = [
+ "piston",
+ "piston2d-graphics",
+ "piston2d-opengl_graphics",
+ "piston_window",
+ "pistoncore-glutin_window",
+]
+
+[[package]]
 name = "same-file"
 version = "1.0.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1171,17 +1182,6 @@ dependencies = [
  "proc-macro2 1.0.18",
  "quote 1.0.7",
  "unicode-xid 0.2.0",
-]
-
-[[package]]
-name = "test_1"
-version = "0.1.0"
-dependencies = [
- "piston",
- "piston2d-graphics",
- "piston2d-opengl_graphics",
- "piston_window",
- "pistoncore-glutin_window",
 ]
 
 [[package]]

@@ -1,5 +1,5 @@
 [package]
-name = "test_1"
+name = "rusty_knots"
 version = "0.1.0"
 authors = ["joshuazlin <joshlin@mit.edu>"]
 edition = "2018"

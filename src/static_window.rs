@@ -79,7 +79,7 @@ impl GraphicsElement{
 
 pub struct StaticWindow {
     opengl: OpenGL, // OpenGL drawing backend.
-    window: PistonWindow,
+    window:  PistonWindow,
     items: Vec<GraphicsElement>,
 }
 
@@ -103,12 +103,39 @@ impl StaticWindow {
 
     fn draw(&mut self){
         while let Some(e) = self.window.next() {
-            self.window.draw_2d(&e, |c, g, _| {
-                clear([1.0; 4], g);
-                for graphic_element in &self.items{
-                    graphic_element.draw(c.transform,g);
-                }
-            });
+
+            self.window.draw_2d(&e, |c,g,_| {clear([1.0;4],g)});
+            
+            for graphic_element in &self.items{
+                self.window.draw_2d(&e, |c,g,_| {
+                    graphic_element.draw(c.transform, g);
+                });
+            }
+
+            // self.window.draw_2d(&e, |c, g, _| {
+            //     clear([1.0; 4], g);
+            //     for graphic_element in &self.items{
+            //         graphic_element.draw(c.transform,g);
+            //     }
+            // });
         };
+    }
+}
+
+#[cfg(test)]
+mod test_draw {
+    use super::*;
+
+    #[test]
+    fn check_draw(){
+        let mut w = StaticWindow::new();
+        w.items.push(GraphicsElement::LineElement{x1 : 1.0,
+                                                  y1 : 2.0,
+                                                  x2 : 3.0,
+                                                  y2 : 4.0,
+                                                  radius:0.1,
+                                                  dashed:false,
+                                                  c:CommonColors::Blue});
+        w.draw();
     }
 }
