@@ -14,7 +14,7 @@ use rand::Rng;
 
 
 
-pub struct Point { x : f64, y : f64,}
+pub struct Point { pub x : f64, pub y : f64,}
 
 impl Point {
     fn distance(&self, v : &Point) -> f64{
@@ -146,9 +146,9 @@ mod test_point {
 pub struct VisibilityGraph {
     eps : f64,
     //vertices : &'a Vec<&'a Point>,
-    vertices : Vec<Point>,
-    physical_edges : Vec<(usize,usize)>, //indexes elements in vertices. 
-    visibility_edges : Vec<(usize,usize)>,
+    pub vertices : Vec<Point>,
+    pub physical_edges : Vec<(usize,usize)>, //indexes elements in vertices. 
+    pub visibility_edges : Vec<(usize,usize)>,
 }
 
 impl VisibilityGraph {
@@ -209,7 +209,9 @@ impl VisibilityGraph {
         //let points : [f64;num_verts] = [rng.gen();num_verts];
         let mut g = VisibilityGraph::new(eps);
         for i in 1..num_verts{
-            g.add_point(Point{x:rng.gen(),y:rng.gen()});
+            let xf : f64 = rng.gen();
+            let yf : f64 = rng.gen();
+            g.add_point(Point{x:width*xf,y:height*yf});
         }
 
         let mut num_added_edges = 0;
@@ -218,7 +220,8 @@ impl VisibilityGraph {
             if !g.physical_edges.iter().any(
                 |e| Edge(&g.vertices[e.0],&g.vertices[e.1]).intersect(
                         &Edge(&g.vertices[i as usize],&g.vertices[(i+1) as usize]),eps).unwrap_or(true)){
-                g.physical_edges.push((i as usize, (i+1) as usize));
+                //g.physical_edges.push((i as usize, (i+1) as usize));
+                g.add_edge((i as usize, (i+1) as usize));
                 num_added_edges = num_added_edges + 1;
                 if num_added_edges >= num_edges{
                     break;

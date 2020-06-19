@@ -51,7 +51,20 @@ impl GraphicsElement{
         match self{
             GraphicsElement::LineElement{x1,y1,x2,y2,radius,dashed,c} => line(c.to_rgb(),*radius,[*x1,*y1,*x2,*y2],t, g),
             GraphicsElement::CircleElement{x,y,radius,c} => ellipse(c.to_rgb(),[*x,*y,*radius,*radius],t,g),
-            _ => {},
+            GraphicsElement::GraphElement(gr) => {
+                for v in gr.vertices.iter(){
+                    ellipse(CommonColors::Black.to_rgb(), [v.x,v.y,5.0,5.0], t, g);
+                }
+                for e in gr.physical_edges.iter(){
+                    line(CommonColors::Blue.to_rgb(),1.0, [gr.vertices[e.0].x,gr.vertices[e.0].y,
+                                                      gr.vertices[e.1].x,gr.vertices[e.1].y], t, g);
+                }
+                for e in gr.visibility_edges.iter(){
+                    line([1.0,0.0,0.0,0.4],1.0, [gr.vertices[e.0].x,gr.vertices[e.0].y,
+                                                      gr.vertices[e.1].x,gr.vertices[e.1].y], t, g);
+                }
+
+            },
         }
 
     }

@@ -7,10 +7,12 @@ use static_window::*;
 use visibility_graph::*;
 
 fn main(){
-     
-
-    let g = VisibilityGraph::random(500.0,500.0,100,20,0.01);
     
+    let g = VisibilityGraph::random(800.0,800.0,30,30,0.01);
 
+    //println!("{:?}",g);
 
+    let mut w = StaticWindow::new("This is the Window Name", 800,800);
+    w.items.push(GraphicsElement::GraphElement(g));
+    w.draw();
 }
